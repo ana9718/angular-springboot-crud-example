@@ -1,18 +1,30 @@
 name: Docker Image CI
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Enter Docker image tag'
+        required: true
+        default: 'latest'
+      environment:
+        description: 'Select environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - production
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          echo "Tag: ${{ github.event.inputs.image_tag }}"
+          echo "Env: ${{ github.event.inputs.environment }}"
+          docker build . --file Dockerfile --tag my-image-name:${{ github.event.inputs.image_tag }}
